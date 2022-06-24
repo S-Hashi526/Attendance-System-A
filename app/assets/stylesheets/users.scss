@@ -5,7 +5,20 @@
   text-align: center;
 }
 
-/* 入力フォーム　*/
+/* ユーザー勤怠情報テーブル */
+
+#table-attendances {
+  th {
+    vertical-align: bottom;
+    text-align: center;
+  }
+  td {
+    vertical-align: bottom;
+    text-align: center;
+  }
+}
+
+/* 入力フォーム */
 
 .label-signup {
   margin-top: 5px;
