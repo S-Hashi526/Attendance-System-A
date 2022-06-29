@@ -19,7 +19,7 @@
       <td>氏名 <%= @user.name %></td>
       <td>コード</td>
       <td></td>
-      <td>出勤日数</td>
+      <td>出勤日数 <%= @worked_sum %>日</td>
       <td>締め <%= l(@last_day, format: :short) %></td>
     </tr>
   </table>
@@ -66,10 +66,24 @@
               <%= link_to "退勤", user_attendance_path(@user, day), method: :patch, class: "btn btn-outline-dark btn-attendance" %>
             <% end %>
           </td>
-          <td></td>
+          <td>
+            <% if day.started_at.present? && day.finished_at.present? %>
+              <%= str_times = working_times(day.started_at, day.finished_at) %>
+              <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
+            <% end %>
+          </td>
           <td></td>
         </tr>
       <% end %>
     </tbody>
+    
+    <tfoot>
+      <tr>
+        <td colspan="2"><%= @attendances.count %></td>
+        <td colspan="6"></td>
+        <td><%= format("%.2f", @total_working_times.to_f) %></td>
+        <td></td>
+      </tr>
+    </tfoot>
   </table>
 </div>
