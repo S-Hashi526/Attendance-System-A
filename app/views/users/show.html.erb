@@ -3,7 +3,7 @@
   <table class="table table-bordered table-condensed user-table">
     <tr>
       <td>
-        <div class="btn-users-show">
+        <div class="btn-user-show">
           <%= link_to "←", user_path(date: @first_day.prev_month), class: "btn btn-outline-dark btn-sm" %>
           <%= l(@first_day, format: :middle) %> 時間管理表
           <%= link_to "→", user_path(date: @first_day.next_month), class: "btn btn-outline-dark btn-sm" %>
@@ -23,6 +23,10 @@
       <td>締め <%= l(@last_day, format: :short) %></td>
     </tr>
   </table>
+</div>
+
+<div class="btn-users-show">
+  <%= link_to "勤怠編集", attendances_edit_one_month_user_path(date: @first_day), class:"btn btn-default" %>
 </div>
 
 <div>
@@ -72,7 +76,7 @@
               <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
             <% end %>
           </td>
-          <td></td>
+          <td><%= day.note %></td>
         </tr>
       <% end %>
     </tbody>
