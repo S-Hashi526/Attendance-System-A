@@ -4,9 +4,9 @@
     <tr>
       <td>
         <div class="btn-user-show">
-          <%= link_to "←", user_path(date: @first_day.prev_month), class: "btn btn-outline-dark btn-sm" %>
+          <%= link_to "←", user_path(date: @first_day.prev_month), class: "btn btn-default btn-sm" %>
           <%= l(@first_day, format: :middle) %> 時間管理表
-          <%= link_to "→", user_path(date: @first_day.next_month), class: "btn btn-outline-dark btn-sm" %>
+          <%= link_to "→", user_path(date: @first_day.next_month), class: "btn btn-default btn-sm" %>
         </div>
       </td>
       <td>指定勤務時間 <%= format_basic_info(@user.work_time) %></td>
@@ -55,7 +55,9 @@
       <% @attendances.each do |day| %>
         <tr>
           <td><%= l(day.worked_on, format: :short) %></td>
-          <td><%= $days_of_the_week[day.worked_on.wday] %></td>
+          <td class = '<%= "wday#{day.worked_on.wday}"%>'>
+            <%= $days_of_the_week[day.worked_on.wday] %>
+          </td>
           <td><%= l(day.started_at, format: :hour) if day.started_at.present? %></td>
           <td><%= l(day.started_at, format: :minit) if day.started_at.present? %></td>
           <td>
