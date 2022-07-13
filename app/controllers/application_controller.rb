@@ -6,12 +6,12 @@ class ApplicationController < ActionController::Base
   
   # beforeフィルター
   
-  # paramsハッシュからユーザーを取得します。
+  # paramsハッシュからユーザーを取得。
   def set_user
     @user = User.find(params[:id])
   end
   
-  # ログイン済みのユーザーか確認します。
+  # ログイン済みのユーザーか確認。
   def logged_in_user
     unless logged_in?
       store_location
@@ -20,14 +20,22 @@ class ApplicationController < ActionController::Base
     end
   end
   
-  # アクセスしたユーザーが現在ログインしているユーザーか確認します。
+  # アクセスしたユーザーが現在ログインしているユーザーか確認。
   def correct_user
     redirect_to(root_url) unless current_user?(@user)
   end
   
-  # システム管理権限所有かどうか判定します。
+  # システム管理権限所有かどうか判定。
   def admin_user
     redirect_to root_url unless current_user.admin?
+  end
+  
+  #システム管理権限所有者以外は他ユーザーへのアクセス制限
+  def admin_or_correct_user
+    unless current_user?(@user) || current_user.admin?
+      flash[:danger] = "権限がありません。"
+      redirect_to root_url
+    end
   end
   
   # ページ出力前に1ヶ月分のデータの存在を確認・セット
