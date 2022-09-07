@@ -4,7 +4,8 @@
 
 ## 開発環境
 
-* AWS Cloud9
-* Ruby
-* Rails
+* VScode
+* Ruby '2.7.6'
+* Rails '~> 5.1.6'
 * Git(HTTPSからSSH通信へ変更)
+* 勤怠Aにて新規リモート設定
