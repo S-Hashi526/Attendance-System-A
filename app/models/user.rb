@@ -49,4 +49,27 @@ class User < ApplicationRecord
   def forget
     update_attribute(:remember_digest, nil)
   end
+
+  # importメソッド
+  def self.import(file)
+    @regist_result = false
+    CSV.foreach(file.path, encoding: 'Shift_JIS:UTF-8', headers: true) do |row|
+      # user = find_by(id: row["id"]) || new
+      user = new
+
+      # CSVからデータを取得し、設定する
+      user.attributes = row.to_hash.slice(*updatable_attributes)
+      if user.save
+        @regist_result = true
+      end
+    end
+    return true if @regist_result
+    return false unless @regist_result
+  end
+  
+  # 更新を許可するカラムを定義
+  def self.updatable_attributes
+    ["title", "user_id"]
+  end
+
 end

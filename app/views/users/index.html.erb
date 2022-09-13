@@ -1,6 +1,14 @@
 <% provide(:title, 'All Users') %>
 <h1>ユーザー一覧</h1>
 
+<!-- CSVインポート -->
+<div class="">
+  <%= form_tag import_users_path, multipart: true do %>
+    <%= file_field_tag :file %>
+    <%= submit_tag "CSVをインポート", class:"btn btn-primary" %>
+  <% end %>
+</div>
+
 <ul class="search-form">
   <%= form_with url: users_path, method: :get, local: true do |form| %>
     <%= form.text_field :search %>

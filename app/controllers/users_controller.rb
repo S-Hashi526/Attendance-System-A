@@ -60,6 +60,22 @@ class UsersController < ApplicationController
     end
     redirect_to users_url
   end
+
+  def import
+    # fileはtmp(temporary）に自動保存
+    if params[:file].presence
+      @regist_check = User.import(params[:file])
+
+      if @regist_check
+        flash[:success] = "CSVファイルのインポートが完了しました。"
+      else
+        flash[:danger] = "更新可能なデータがありませんでした。"
+      end
+    else
+      flash[:danger] = "CSVファイルを選択してください。"
+    end
+    redirect_to users_url
+  end
   
   private
 
