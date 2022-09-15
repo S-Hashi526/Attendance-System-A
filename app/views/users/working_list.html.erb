@@ -1,0 +1,30 @@
+<% provide(:title, 'working list') %>
+<h1>出勤中社員一覧</h1>
+
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <td><div class="text-center"><%= User.human_attribute_name :employee_number %></div></td>
+      <td><div class="text-center"><%= User.human_attribute_name :name %></div></td>
+    </tr>
+  </thead>
+
+  <tbody>
+    <!--全ユーザーを順に確認-->
+    <% @user.each do |user| %>
+      <!--全ユーザーの出勤状況を確認-->
+      <% user.attendances.each do |attendance| %>
+        <!--本日の日付のみを確認-->
+        <% if attendance.worked_on == Date.current %>
+          <!--出勤済みかつ未退社のユーザーを表示-->
+          <% if attendance.started_at.present? && attendance.finished_at.nil? %>
+            <tr>
+              <td><div class="text-center"><%= user.employee_number %></div?></td>
+              <td><div class="text-center"><%= user.name %></div></td>
+            </tr>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
