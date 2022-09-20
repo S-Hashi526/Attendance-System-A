@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'bases/new'
+
   resources :tasks
   root 'static_pages#top'
   get '/signup', to: 'users#new'
@@ -19,5 +21,7 @@ Rails.application.routes.draw do
     end
     collection {post :import}
     resources :attendances, only: :update
+  end
+  resources :bases do
   end
 end
