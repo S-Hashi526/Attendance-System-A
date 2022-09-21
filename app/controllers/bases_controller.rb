@@ -28,7 +28,7 @@ class BasesController < ApplicationController
     @base_name = @base.base_name
     if @base.update_attributes(base_params)
       flash[:success] = "#{@base.base_name}の拠点情報が更新されました。"
-      radirect_to bases_url
+      redirect_to bases_url
     else
       flash[:danger] = "#{@base.base_name}の拠点情報を更新できませんでした。"
       redirect_to bases_url
@@ -36,7 +36,7 @@ class BasesController < ApplicationController
   end
   
   def destroy
-    @base_name = @base.base_name
+    @basename = @base.base_name
     @base.destroy
     flash[:success] = "#{@basename}の削除が完了しました。"
     redirect_to bases_path
