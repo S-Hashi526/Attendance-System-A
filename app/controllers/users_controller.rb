@@ -13,6 +13,22 @@ class UsersController < ApplicationController
   
   def show
     @worked_sum = @attendances.where.not(started_at: nil).count
+    #@r_count = Report.where(r_request: @user.name, r_approval: "申請中").count
+    #@a_count = Attendance.where(c_request: @user.name, c_approval: "申請中").count
+    #@o_count = Attendance.where(o_request: @user.name, o_approval: "申請中").count
+  end
+
+  def csv_export
+    raspond_to do |format|
+      format.html do
+          #html用の処理を書く
+      end
+      format.csv do
+          #csv用の処理を書く
+        send_data render_to_string,
+        filename: "【勤怠】#{@user.name}_#{@first_day.strftim("%Y-%m")}.csv", type: :csv
+      end
+    end
   end
 
   def new
