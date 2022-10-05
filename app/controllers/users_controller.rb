@@ -1,10 +1,15 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
-  before_action :logged_in_user, only: [:edit, :update, :destroy, :edit_basic_info, :update_basic_info]
-  before_action :correct_user, only: [:edit, :update]
-  before_action :admin_user, only: [:index, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :set_user, only: [:show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info, :edit_basic_info_admin, :working_list, :attendance_log, :csv_export]
+  # アクセス先のログインユーザーor上長（管理者も不可）
   before_action :admin_or_correct_user, only: :show
-  before_action :set_one_month, only: :show
+  # ログイン中のユーザーか
+  before_action :logged_in_user, only: [:edit, :index, :edit, :update, :destroy, :edit_basic_info, :update_basic_info, :edit_basic_info_admin, :attendance_log, :working_list]
+  # アクセス先のログインユーザー
+  before_action :correct_user, only: [:edit, :update, :attendance_log]
+  # 管理者ユーザー
+  before_action :admin_user, only: [:index, :destroy, :edit_basic_info, :update_basic_info, :edit_basic_info_admin, :working_list]
+  # 1か月分の勤怠情報を取得
+  before_action :set_one_month, only: [:show,  :attendance_log, :csv_export]
 
   def index
     @users = User.paginate(page: params[:page])
@@ -12,21 +17,22 @@ class UsersController < ApplicationController
   end
   
   def show
+    @users = User.all
     @worked_sum = @attendances.where.not(started_at: nil).count
-    #@r_count = Report.where(r_request: @user.name, r_approval: "申請中").count
-    #@a_count = Attendance.where(c_request: @user.name, c_approval: "申請中").count
-    #@o_count = Attendance.where(o_request: @user.name, o_approval: "申請中").count
+    @r_count = Report.where(r_request: @user.name, r_approval: "申請中").count
+    @a_count = Attendance.where(c_request: @user.name, c_approval: "申請中").count
+    @o_count = Attendance.where(o_request: @user.name, o_approval: "申請中").count
   end
 
   def csv_export
-    raspond_to do |format|
+    respond_to do |format|
       format.html do
           #html用の処理を書く
       end
       format.csv do
           #csv用の処理を書く
         send_data render_to_string,
-        filename: "【勤怠】#{@user.name}_#{@first_day.strftim("%Y-%m")}.csv", type: :csv
+        filename: "【勤怠】#{@user.name}_#{@first_day.strftime("%Y-%m")}.csv", type: :csv
       end
     end
   end
@@ -52,8 +58,9 @@ class UsersController < ApplicationController
   def update
     if @user.update_attributes(user_params)
       flash[:success] = "アカウント情報を更新しました。"
-      redirect_to @user
+      redirect_to edit_user_url
     else
+      flash[:danger] = "#{@user.name}の更新は失敗しました。<br><li>" + @user.errors.full_messages.join("</li><li>")
       render :edit
     end
   end
@@ -66,22 +73,25 @@ class UsersController < ApplicationController
   
   def edit_basic_info
   end
+
+  def edit_basic_info_admin
+  end
   
   def working_list
-    @user = User.all
+    @users = User.all
   end
 
   def update_basic_info
     if @user.update_attributes(basic_info_params)
       flash[:success] = "#{@user.name}の基本情報を更新しました。"
     else
-      flash[:danger] = "#{@user.name}の更新は失敗しました。"+ @user.errors.full_messages.join("<br>")
+      flash[:danger] = "#{@user.name}の更新は失敗しました。<br><li>" + @user.errors.full_messages.join("</li><li>")
     end
     redirect_to users_url
   end
 
   def import
-    # fileはtmp(temporary）に自動保存
+    # fileはtmp(temporary)に自動保存
     if params[:file].presence
       @regist_check = User.import(params[:file])
 
@@ -96,14 +106,39 @@ class UsersController < ApplicationController
     redirect_to users_url
   end
   
+  # 勤怠修正ログ
+  def attendance_log
+    @attendances = Attendance.where(user_id: @user).where(c_approval: "承認").order(worked_on: "DESC")
+
+    if params[:attendance].present?
+      unless params[:attendance][:worked_on] == ""
+        @search_date = params[:attendance][:worked_on] + "-1"
+        @attendances = @attendances.where(started_at: @search_date.in_time_zone.all_year)
+                                   .where(started_at: @search_date.in_time_zone.all_month)
+        if @attendances.count == 0
+          flash.now[:warning] = "承認済みの修正履歴がありません。"
+        end
+      else
+        flash.now[:warning] = "年月を選択してください。"
+      end
+    end
+  end
+
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :department, :password, :password_confirmation)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :card_id, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
     def basic_info_params
-      params.require(:user).permit(:department, :basic_time, :work_time)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :card_id, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
-    
+
+    def query
+      if params[:user].present? && params[:user][:name] != ""
+        @search_value = User.where('name LIKE ?', "%#{params[:user][:name]}%")
+      else
+        User.all
+      end
+    end
 end

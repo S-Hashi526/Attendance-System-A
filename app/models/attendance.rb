@@ -3,8 +3,12 @@ class Attendance < ApplicationRecord
   
   validates :worked_on, presence: true
   validates :note, length: { maximum: 50 }
+
+# 残業申請バリデーション
+  validates :o_request, presence: true, on: :overtime_update
+  validates :business_process, presence: true, on: :overtime_update
   
-  # 出勤時間が存在しない場合、退勤時間は無効
+# 出勤時間が存在しない場合、退勤時間は無効
   validate :finished_at_is_invalid_without_a_started_at
   # 出勤・退勤時間どちらも存在する場合、出勤時間より早い退勤時間は無効
   validate :started_at_than_finished_at_fast_if_invalid
