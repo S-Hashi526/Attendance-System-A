@@ -1,5 +1,5 @@
 class AttendancesController < ApplicationController
-  before_action :set_user, only: [:edit_one_month, :update_one_month, :req_over_time, :update_overtime, :notice_overtime, :update_notice_overtime, :notice_change_at, :update_notice_change_at, :attendance_log]
+  before_action :set_user, only: [:edit_one_month, :update_one_month, :req_over_time, :update_over_time, :notice_overtime, :update_notice_overtime, :notice_change_at, :update_notice_change_at, :attendance_log]
   # ログイン中のユーザーか
   before_action :logged_in_user, only: [:update_one_month, :edit_one_month]
   # アクセス先のログインユーザーor上長（管理者も不可）
@@ -18,16 +18,34 @@ class AttendancesController < ApplicationController
     @attendance = Attendance.find(params[:id])
     # 出勤時間が未登録であることを判定
     if @attendance.started_at.nil?
-      if @attendance.update_attributes(started_at: Time.current.change(min: 0))
-        flash[:info] = "おはようございます！"
+      unless @attendance.c_approval == "申請中"
+        if @attendance.update_attributes(started_at: Time.current.change(sec: 0),
+                                         c_af_started_at: Time.current.change(sec: 0))
+          flash[:info] = "おはようございます！"
+        else
+          flash[:danger] = UPDATE_ERROR_MSG + @attendance.errors.full_messages.join
+        end
       else
-        flash[:danger] = UPDATE_ERROR_MSG
+        if @attendance.update_attributes(started_at: Time.current.change(sec: 0))
+          flash[:info] = "おはようございます！"
+        else
+          flash[:danger] =UPDATE_ERROR_MSG + @attendance.errors.full_messages.join
+        end
       end
     elsif @attendance.finished_at.nil?
-      if @attendance.update_attributes(finished_at: Time.current.change(sec: 0))
-        flash[:info] = "お疲れさまでした。"
+      unless @attendance.c_approval == "申請中"
+        if @attendance.update_attributes(finished_at: Time.current.change(sec: 0)
+                                         c_af_finished_at: Time.current.change(sec: 0))
+          flash[:info] = "お疲れさまでした。"
+        else
+          flash[:danger] = UPDATE_ERROR_MSG
+        end
       else
-        flash[:danger] = UPDATE_ERROR_MSG
+        if @attendance.update_attributes(finished_at: Time.current.change(sec: 0))
+          flash[:info] = "お疲れさまでした。"
+        else
+          flash[:danger] = UPDATE_ERROR_MSG
+        end
       end
     end
     redirect_to @user
@@ -42,25 +60,26 @@ class AttendancesController < ApplicationController
     @count = 0 # 申請完了件数のカウンター
     ActiveRecord::Base.transaction do # トランザクションを開始。
       attendances_params.each do |id, item|
-      attendance = Attendance.find(id)
-        if (item[:started_at].blank? && item[:finished_at].present?) || (item[:started_at].present? && item[:finished_at].blank?)
-          flash[:danger] = "出勤時間及び退勤時間が必要です。"
-          redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
-        end
-        attendance.update_attributes!(item)
-      end
+        @attendance = Attendance.find(id)
+        @attendance.attributes = item
+
+        # 現在日以前のみ確認
+        if @attendance.worked_on <= Date.current
       
-      if @attendance.c_request.present? && @attendence.c_approval != "申請中"
-        @attendance.c_af_started_at = make.time(@attendance, "start")
-        @attendance.c_af_finished_at = make_time(@attendance, "finish")
+          # 申請先選択済みかつ既に申請中でない
+          if @attendance.c_request.present? && @attendance.c_approval != "申請中"
+            @attendance.c_af_started_at = make.time(@attendance, "start")
+            @attendance.c_af_finished_at = make.time(@attendance, "finish")
 
-        # 変更前の履歴を保存
-        @attendance.c_bf_started_at = @attendance.started_at if @attendance.started_at.present?
-        @attendance.c_bf_finished_at = @attendance.finished_at if @attendance.finished_at.present?
+            # 変更前の履歴を保存
+            @attendance.c_bf_started_at = @attendance.started_at if @attendance.started_at.present?
+            @attendance.c_bf_finished_at = @attendance.finished_at if @attendance.finished_at.present?
 
-        @attendance.c_approval = "申請中"
-        if @attendance.save!(context: :attendance_update)
-          @count += 1
+            @attendance.c_approval = "申請中"
+            if @attendance.save!(context: :attendance_update)
+              @count += 1
+            end
+          end
         end
       end
     end
@@ -68,7 +87,7 @@ class AttendancesController < ApplicationController
       flash[:success] = "勤怠情報の編集申請を#{@count}件送信しました。"
       redirect_to user_url(date: params[:date])
     else
-      flash[:warking] = "申請先が未選択です。"
+      flash[:warning] = "申請先が未選択です。"
       redirect_to attendances_edit_one_month_user_url(date: params[:date])
     end
   rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐
@@ -88,7 +107,7 @@ class AttendancesController < ApplicationController
     ActiveRecord::Base.transaction do # トランザクションを開始
       notice_change_at_params.each do |id,item|
         attendance = Attendance.find(id)
-        attandance.attributes = item
+        attendance.attributes = item
         if attendance.change && attendance.c_approval != "申請中"
           if attendance.c_approval =="承認"
             
@@ -112,8 +131,8 @@ class AttendancesController < ApplicationController
             attendance.c_request = nil
             attendance.change = false
             if attendance.save!
-              @count[1] += if attendance.c_approval == "否認"
-              @count[2] += if attendance.c.approval == "なし"
+              @count[1] += 1 if attendance.c_approval == "否認"
+              @count[2] += 1 if attendance.c.approval == "なし"
               end
               end
             end
@@ -142,35 +161,38 @@ class AttendancesController < ApplicationController
       end
 
       # 残業申請の送信
-      def update_overtime_params.each do |id, item|
-        @attendance = Attendance,find(id)
-        @attendance.attributes = item
-        # 残業時間の計算
-        if @attendance.started_at.blank?
-          @started_nil = true
-        else
-          @total = overtime_calc(@attendance)
-          if @total <= 24
-            @attendance.o_approval = '申請中'
-            @attendance.save!(context: :overtime_update)
-            @worked_on = l(@attendance.worked_on, format: :short)
-            @o_repuest = @attendance.o_request
+      def update_overtime
+        @total = 0
+        ActiveRecord::Base.transaction do #トランザクションを開始
+          req_overtime_params.each do |id, item|
+            @attendance = Attendance.find(id)
+            @attendance.attributes = item
+            # 残業時間の計算
+            if @attendance.started_at.blank?
+              @started_nil = true
+            else
+              @total = overtime_calc(@attendance)
+              if @total <= 24
+                @attendance.o_approval = '申請中'
+                @attendance.save!(context: :overtime_update)
+                @worked_on = l(@attendance.worked_on, format: :short)
+                @o_request = @attendance.o_request
+              end
+            end
           end
         end
+        if @started_nil
+          flash[:danger] = "出社時間が入力されていません。"
+        elsif @total <= 24
+          flash[:success] = "#{@worked_on}の残業申請を\"#{@o_request}\"へ送信しました。"
+        else
+          flash[:danger] = "在社時間が24時間をオーバーしています。"
+        end
+        redirect_to user_url(date: @first_day)
+      rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐
+        flash[:danger] = @attendance.errors.full_messages.join
+        redirect_to user_url(date: @first_day)
       end
-    end
-    if @started_nil
-      flash[:danger] = "出社時間が入力されていません。"
-    elsif @total <= 24
-      flash[:success] = "#{@worked_on} の残業時間が24時間をオーバーしています。"
-    else
-      flash[:danger] = "在社時間が24時間をオーバーしています。"
-    end
-    redirect_to user_url(date: @first_day)
-  rescue ActiveRecord:: RecordInvalid # トランザクションによるエラーの分岐
-    flash[:danger] = @attendance.errors.full_messages.join
-    redirect_to user_url(date: @first_day)
-  end
 
   # 残業申請通知フォーム
   def notice_overtime
