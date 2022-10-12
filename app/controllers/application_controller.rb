@@ -35,6 +35,7 @@ class ApplicationController < ActionController::Base
     unless current_user.admin?
       flash[:danger] = "権限がありません。"
     redirect_to root_url
+    end
   end
   
   # システム管理権限所有者以外は他ユーザーへのアクセス制限
@@ -71,4 +72,5 @@ class ApplicationController < ActionController::Base
     flash[:danger] = "ページ情報の取得に失敗しました、再アクセスしてください。"
     redirect_to root_url
   end
+
 end

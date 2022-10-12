@@ -1,9 +1,9 @@
 class AttendancesController < ApplicationController
-  before_action :set_user, only: [:edit_one_month, :update_one_month, :req_over_time, :update_over_time, :notice_overtime, :update_notice_overtime, :notice_change_at, :update_notice_change_at, :attendance_log]
+  before_action :set_user, only: [:edit_one_month, :update_one_month, :req_overtime, :update_overtime, :notice_overtime, :update_notice_overtime, :notice_change_at, :update_notice_change_at, :attendance_log]
+  # アクセス先のログインユーザーor上長（管理者も不可）
+  before_action :admin_or_correct_user, only: [:edit_one_month, :update_one_month]
   # ログイン中のユーザーか
   before_action :logged_in_user, only: [:update_one_month, :edit_one_month]
-  # アクセス先のログインユーザーor上長（管理者も不可）
-  before_action :admin_or_correct_user, only: [:update, :edit_one_month, :update_one_month]
   # アクセス先のログインユーザーか
   before_action :correct_user, only: [:edit_one_month, :update_one_month]
   # 1か月分の勤怠情報を取得
@@ -20,7 +20,7 @@ class AttendancesController < ApplicationController
     if @attendance.started_at.nil?
       unless @attendance.c_approval == "申請中"
         if @attendance.update_attributes(started_at: Time.current.change(sec: 0),
-                                         c_af_started_at: Time.current.change(sec: 0))
+                                        c_af_started_at: Time.current.change(sec: 0))
           flash[:info] = "おはようございます！"
         else
           flash[:danger] = UPDATE_ERROR_MSG + @attendance.errors.full_messages.join
@@ -34,8 +34,8 @@ class AttendancesController < ApplicationController
       end
     elsif @attendance.finished_at.nil?
       unless @attendance.c_approval == "申請中"
-        if @attendance.update_attributes(finished_at: Time.current.change(sec: 0)
-                                         c_af_finished_at: Time.current.change(sec: 0))
+        if @attendance.update_attributes(finished_at: Time.current.change(sec: 0),
+                                        c_af_finished_at: Time.current.change(sec: 0))
           flash[:info] = "お疲れさまでした。"
         else
           flash[:danger] = UPDATE_ERROR_MSG
@@ -68,8 +68,8 @@ class AttendancesController < ApplicationController
       
           # 申請先選択済みかつ既に申請中でない
           if @attendance.c_request.present? && @attendance.c_approval != "申請中"
-            @attendance.c_af_started_at = make.time(@attendance, "start")
-            @attendance.c_af_finished_at = make.time(@attendance, "finish")
+            @attendance.c_af_started_at = make_time(@attendance, "start")
+            @attendance.c_af_finished_at = make_time(@attendance, "finish")
 
             # 変更前の履歴を保存
             @attendance.c_bf_started_at = @attendance.started_at if @attendance.started_at.present?
@@ -105,7 +105,7 @@ class AttendancesController < ApplicationController
   def update_notice_change_at
     @count= [0,0,0]
     ActiveRecord::Base.transaction do # トランザクションを開始
-      notice_change_at_params.each do |id,item|
+      notice_change_at_params.each do |id, item|
         attendance = Attendance.find(id)
         attendance.attributes = item
         if attendance.change && attendance.c_approval != "申請中"
@@ -116,7 +116,7 @@ class AttendancesController < ApplicationController
             attendance.finished_at = attendance.c_af_finished_at
             attendance.c_bf_nextday = attendance.c_af_nextday
 
-            attendance.o_nextday= true if attendance.c_bf_nextday
+            attendance.o_nextday = true if attendance.c_bf_nextday
             attendance.c_approval_date = Time.now
             if attendance.save!
               @count[0] += 1
@@ -132,7 +132,7 @@ class AttendancesController < ApplicationController
             attendance.change = false
             if attendance.save!
               @count[1] += 1 if attendance.c_approval == "否認"
-              @count[2] += 1 if attendance.c.approval == "なし"
+              @count[2] += 1 if attendance.c_approval == "なし"
               end
               end
             end
@@ -141,7 +141,7 @@ class AttendancesController < ApplicationController
         unless @count.sum == 0
           flash[:success] = "#{@count.sum}件の申請を更新しました。（承諾：#{@count[0]}件、否認：#{@count[1]}件、なし：#{@count[2]}件）"
         else
-          flash [:warning] = "更新できる申請がありません。"
+          flash[:warning] = "更新できる申請がありません。"
         end
         redirect_to user_url(@user)
       rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐
@@ -153,9 +153,10 @@ class AttendancesController < ApplicationController
       def req_overtime
         @att_id = @user.attendances.find(params[:att_id].to_i)
 
-        # 申請していない場合、デフォルト時間を0:00へ設定
+        # 申請していない場合、デフォルト時間を00:00へ設定
         if @att_id.o_request.nil?
-          @att_id.end_time = Time.current.change(year: @att_id.worked_on.year, month: @att_id.worked_on.month, day: @att_id.worked_on.day, hour: '0', min:'0', sec: '0')
+          @att_id.end_time = Time.current.change(year: @att_id.worked_on.year, month: @att_id.worked_on.month, 
+                                                day: @att_id.worked_on.day, hour: '0', min: '0', sec: '0')
           @att_id.save
         end
       end
@@ -196,7 +197,7 @@ class AttendancesController < ApplicationController
 
   # 残業申請通知フォーム
   def notice_overtime
-    @notice_user = User.where(id: Attendance.where(o_request: @user.name, o_aproval: "申請中").select(:user_id))
+    @notice_user = User.where(id: Attendance.where(o_request: @user.name, o_approval: "申請中").select(:user_id))
     @attendance_lists = Attendance.where(o_request: @user.name, o_approval: "申請中")
   end
 
@@ -207,8 +208,9 @@ class AttendancesController < ApplicationController
       notice_overtime_params.each do |id, item|
         attendance = Attendance.find(id)
         attendance.attributes = item
-        if attendance.change && attndance.o_approval != "申請中"
+        if attendance.change && attendance.o_approval != "申請中"
           if attendance.o_approval == "承認"
+            attendance.finished_at = attendance.end_time
             attendance.c_af_finished_at = attendance.end_time
             attendance.c_bf_nextday = true if attendance.o_nextday
             if attendance.save!
@@ -219,7 +221,7 @@ class AttendancesController < ApplicationController
             attendance.overtime = nil
             attendance.o_request = nil
             attendance.o_nextday = false
-            attendance.bussiness_process = nil
+            attendance.business_process = nil
             if attendance.save!
               @count[1] += 1 if attendance.o_approval == "否認"
               @count[2] += 1 if attendance.o_approval == "なし"
@@ -229,7 +231,7 @@ class AttendancesController < ApplicationController
       end
     end
     unless @count.sum == 0
-      flash[:success] = "#{count.sum}件の申請を更新しました。 (承諾：#{@count[0]}件、否認：#{@count[1]}件、なし：#{@count[2]}件)"
+      flash[:success] = "#{count.sum}件の申請を更新しました。 （承諾：#{@count[0]}件、否認：#{@count[1]}件、なし：#{@count[2]}件）"
     else
       flash[:warning] = "変更にチェックがなかったため中止しました。"
     end
@@ -258,7 +260,7 @@ class AttendancesController < ApplicationController
 
     # 残業時間の計算
     def overtime_calc(at)
-      # 比較計算用 指定勤務終了時間の作成
+      # 比較計算用 指定勤務時間の作成
       @work_end_time = (Time.local(at.end_time.year,
                               at.end_time.month,
                               at.end_time.day,
@@ -266,10 +268,10 @@ class AttendancesController < ApplicationController
                               @user.designated_work_end_time.min,
                               0).in_time_zone("Asia/Tokyo")).floor_to(15.minutes)
                               
-      # 比較計算用 指定勤務終了時間の作成
+      # 比較計算用 指定勤務開始時間の作成
       @work_start_time = (Time.local(at.end_time.year,
-                              at.end_time.month,
-                              at.end_time.day,
+                              at.start_time.month,
+                              at.start_time.day,
                               @user.designated_work_end_time.hour,
                               @user.designated_work_end_time.min,
                               0).in_time_zone("Asia/Tokyo")).floor_to(15.minutes)
@@ -281,7 +283,7 @@ class AttendancesController < ApplicationController
         @over = (@work_start_time - @start)
       end
 
-      # 指定勤務時間より遅く出社してた場合
+      # 指定勤務終了より遅く出社してた場合
       if at.started_at > @work_end_time
         @start = at.started_at.floor_to(15.minutes)
         @over = (@work_end_time - @start)
@@ -291,9 +293,9 @@ class AttendancesController < ApplicationController
       if at.o_nextday.present?
         @end = at.end_time.since(1.days).floor_to(15.minutes)
         at.overtime = (((@end - @work_end_time) + @over) / 3600)
-        t1 = ((at.end_time.since(1.days) - at.started_at) /3600)
+        t1 = ((at.end_time.since(1.days) - at.started_at) / 3600)
       else
-        @end = at.end_time.floor_to(15.minutes)
+        @end = at.end_time.floor_to(15.minutes) 
         at.overtime = (((@end - @work_end_time) + @over) / 3600)
         t2 = ((at.started_at - at.end_time) / 3600)
       end
@@ -313,3 +315,4 @@ class AttendancesController < ApplicationController
                                0).in_time_zone("Asia/Tokyo") - 9.hour
       return @datetime
     end
+  end

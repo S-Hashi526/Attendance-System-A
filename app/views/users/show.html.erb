@@ -59,8 +59,6 @@
 <!-- 勤怠の編集や出力を行うボタン -->
 <div class="btn-users-show">
   <%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class:"btn btn-primary" %>
-  <%= link_to "CSV出力", csv_export_user_path(format: :csv, date: @first_day), class:"btn btn-primary" %><br>
-  <%= link_to "勤怠修正ログ（承認済み）", atendance_log_user_path(date: @first_day), class:"btn btn-primary" %>
 </div>
 
 <!-- 勤怠テーブル -->
