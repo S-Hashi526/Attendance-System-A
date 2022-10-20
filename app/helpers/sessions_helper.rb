@@ -48,6 +48,6 @@ module SessionsHelper
   end
   
   def store_location
-    session[:fowarding_url] = repuest.original_url if request.git?
+    session[:fowarding_url] = request.original_url if request.get?
   end
 end

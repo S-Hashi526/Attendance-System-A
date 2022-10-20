@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
   get 'bases/new'
 
-  resources :tasks
+  get 'sessions/new'
+
   root 'static_pages#top'
   get '/signup', to: 'users#new'
   
@@ -14,13 +15,24 @@ Rails.application.routes.draw do
   resources :users do
     member do
       get 'edit_basic_info'
-      patch 'update_basic_info'
+      get 'edit_basic_info_admin'
       get 'working_list'
+      patch 'update_basic_info'
+      get 'attendance_log'
+      get 'csv_export'
       get 'attendances/edit_one_month'
       patch 'attendances/update_one_month'
+
+      get 'attendances/req_overtime'
+      patch 'attendances/update_overtime'
+      get 'attendances/notice_overtime'
+      patch 'attendances/update_notice_change_at'
+      get 'reports/notice_report'
+      patch 'reports/update_report'
     end
     collection {post :import}
     resources :attendances, only: :update
+    resources :reports, only: :create
   end
   resources :bases do
   end

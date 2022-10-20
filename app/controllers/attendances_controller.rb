@@ -245,7 +245,7 @@ class AttendancesController < ApplicationController
   
     # 1か月分の勤怠情報を扱います。
     def attendances_params
-      params.require(:user).permit(attendances: [:started_at, :finished_at, :note])[:attendances]
+      params.require(:user).permit(attendances: [:c_af_started_at, :c_af_finished_at, :c_af_nextday, :c_request, :note])[:attendances]
     end
     
     # 通知のあった勤怠変更申請の承認内容を扱います。
@@ -255,12 +255,17 @@ class AttendancesController < ApplicationController
 
     # 残業時間申請内容を扱います。
     def req_overtime_params
+      params.require(:user).permit(attendances:[:end_time, :overtime, :o_nextday, :business_process, :o_approval])[:attendances]
+    end
+
+    # 通知のあった残業時間申請の承認内容を扱います。
+    def notice_overtime_params
       params.require(:user).permit(attendances:[:o_approval, :change])[:attendances]
     end
 
     # 残業時間の計算
     def overtime_calc(at)
-      # 比較計算用 指定勤務時間の作成
+      # 比較計算用 指定勤務終了時間の作成
       @work_end_time = (Time.local(at.end_time.year,
                               at.end_time.month,
                               at.end_time.day,
@@ -270,10 +275,10 @@ class AttendancesController < ApplicationController
                               
       # 比較計算用 指定勤務開始時間の作成
       @work_start_time = (Time.local(at.end_time.year,
-                              at.start_time.month,
-                              at.start_time.day,
-                              @user.designated_work_end_time.hour,
-                              @user.designated_work_end_time.min,
+                              at.end_time.month,
+                              at.end_time.day,
+                              @user.designated_work_start_time.hour,
+                              @user.designated_work_start_time.min,
                               0).in_time_zone("Asia/Tokyo")).floor_to(15.minutes)
 
       # 指定勤務開始時間より早く出社してた場合
@@ -283,7 +288,7 @@ class AttendancesController < ApplicationController
         @over = (@work_start_time - @start)
       end
 
-      # 指定勤務終了より遅く出社してた場合
+      # 指定勤務終了時間より遅く出社してた場合
       if at.started_at > @work_end_time
         @start = at.started_at.floor_to(15.minutes)
         @over = (@work_end_time - @start)
