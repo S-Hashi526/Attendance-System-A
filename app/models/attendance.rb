@@ -30,7 +30,7 @@ class Attendance < ApplicationRecord
   validate :started_at_than_finished_at_fast_if_invalid, on: :attendance_update
 
   # 在社時間は24時間以上
-  validate :toal_working_over24h, on: :attendance_update
+  validate :total_working_over24h, on: :attendance_update
 
   def need_item
     errors.add(:started_at, "の入力が不足しています") if c_af_finished_at.blank?

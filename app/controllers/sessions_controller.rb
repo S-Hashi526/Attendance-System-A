@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  before_action :logged_in_not_access, only: :new
 
   def new
   end
@@ -16,7 +17,7 @@ class SessionsController < ApplicationController
       if current_user.admin?
         redirect_to users_url
       else
-        redirect_to current_user
+        redirect_back_or user
       end
 
       # ユーザー情報ページにリダイレクト
@@ -34,5 +35,4 @@ class SessionsController < ApplicationController
     flash[:success] = 'ログアウトしました。'
     redirect_to root_url
   end
-  
 end

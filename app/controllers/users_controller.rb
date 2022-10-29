@@ -60,7 +60,7 @@ class UsersController < ApplicationController
       flash[:success] = "アカウント情報を更新しました。"
       redirect_to edit_user_url
     else
-      flash[:danger] = "#{@user.name}の更新は失敗しました。<br><li>" + @user.errors.full_messages.join("</li><li>")
+      flash[:danger] = "#{@user.name}のアカウント情報の更新は失敗しました。"
       render :edit
     end
   end
@@ -127,11 +127,11 @@ class UsersController < ApplicationController
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :card_id, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
     def basic_info_params
-      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :card_id, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
 
     def query

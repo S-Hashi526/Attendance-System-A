@@ -11,7 +11,7 @@
 
   <tbody>
     <!--全ユーザーを順に確認-->
-    <% @user.each do |user| %>
+    <% @users.each do |user| %>
       <!--全ユーザーの出勤状況を確認-->
       <% user.attendances.each do |attendance| %>
         <!--本日の日付のみを確認-->

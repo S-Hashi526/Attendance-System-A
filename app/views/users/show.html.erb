@@ -22,7 +22,7 @@
     </tr>
     
     <tr>
-      <td>所属： <%= @user.department.present? ? @user.department : "未所属" %></td>
+      <td>所属： <%= @user.affiliation.present? ? @user.affiliation : "未所属" %></td>
       <td>氏名： <%= @user.name %></td>
       <td>コード：</td>
       <td><%= @user.employee_number %></td>
@@ -117,7 +117,9 @@
         <td><%= l(day.worked_on, format: :short) %></td>
         
         <!-- 曜日 -->
-        <td><%= render 'shared/day_of_week', object: @day = oneday %></td>
+        <td class = '<%= "wday#{day.worked_on.wday}"%>'>
+          <%= $days_of_the_week[day.worked_on.wday] %>
+        </td>
 
         <!-- 出社：時、分 -->
         <td><%= l(day.started_at.floor_to(15.minutes), format: :hour) if day.started_at.present? %></td>
