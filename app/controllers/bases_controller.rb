@@ -1,6 +1,7 @@
 class BasesController < ApplicationController
   before_action :set_base, only: [:edit, :update, :destroy]
 
+  # 管理者かどうか
   before_action :admin_user, only: [:index, :edit, :update, :destroy]
 
   def new
@@ -28,10 +29,10 @@ class BasesController < ApplicationController
     @base_name = @base.base_name
     if @base.update_attributes(base_params)
       flash[:success] = "#{@base.base_name}の拠点情報が更新されました。"
-      redirect_to bases_url
+      redirect_to bases_path
     else
-      flash[:danger] = "#{@base.base_name}の拠点情報を更新できませんでした。"
-      redirect_to bases_url
+      flash[:success] = "#{@base.base_name}の拠点情報を更新できませんでした。"
+      redirect_to bases_path
     end
   end
   

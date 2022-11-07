@@ -29,7 +29,7 @@ class AttendancesController < ApplicationController
         if @attendance.update_attributes(started_at: Time.current.change(sec: 0))
           flash[:info] = "おはようございます！"
         else
-          flash[:danger] =UPDATE_ERROR_MSG + @attendance.errors.full_messages.join
+          flash[:danger] = UPDATE_ERROR_MSG + @attendance.errors.full_messages.join
         end
       end
     elsif @attendance.finished_at.nil?
@@ -103,13 +103,13 @@ class AttendancesController < ApplicationController
 
   # 勤怠変更申請のお知らせフォーム *承認状態の変更
   def update_notice_change_at
-    @count= [0,0,0]
+    @count = [0,0,0]
     ActiveRecord::Base.transaction do # トランザクションを開始
       notice_change_at_params.each do |id, item|
         attendance = Attendance.find(id)
         attendance.attributes = item
         if attendance.change && attendance.c_approval != "申請中"
-          if attendance.c_approval =="承認"
+          if attendance.c_approval == "承認"
             
             # メインの勤怠一覧用の時間を置き換える
             attendance.started_at = attendance.c_af_started_at
@@ -149,14 +149,14 @@ class AttendancesController < ApplicationController
         redirect_to user_url(@user)
       end
 
-      #残業フォーム
+      #残業申請フォーム
       def req_overtime
         @att_id = @user.attendances.find(params[:att_id].to_i)
 
         # 申請していない場合、デフォルト時間を00:00へ設定
         if @att_id.o_request.nil?
-          @att_id.end_time = Time.current.change(year: @att_id.worked_on.year, month: @att_id.worked_on.month, 
-                                                day: @att_id.worked_on.day, hour: '0', min: '0', sec: '0')
+          @att_id.end_time = Time.current.change(year: @att_id.worked_on.year, month: @att_id.worked_on.month,
+                                                  day: @att_id.worked_on.day, hour: '0', min: '0', sec: '0')
           @att_id.save
         end
       end
@@ -231,7 +231,7 @@ class AttendancesController < ApplicationController
       end
     end
     unless @count.sum == 0
-      flash[:success] = "#{count.sum}件の申請を更新しました。 （承諾：#{@count[0]}件、否認：#{@count[1]}件、なし：#{@count[2]}件）"
+      flash[:success] = "#{@count.sum}件の申請を更新しました。 （承諾：#{@count[0]}件、否認：#{@count[1]}件、なし：#{@count[2]}件）"
     else
       flash[:warning] = "変更にチェックがなかったため中止しました。"
     end
@@ -255,12 +255,12 @@ class AttendancesController < ApplicationController
 
     # 残業時間申請内容を扱います。
     def req_overtime_params
-      params.require(:user).permit(attendances:[:end_time, :overtime, :o_nextday, :business_process, :o_approval])[:attendances]
+      params.require(:user).permit(attendances:[:end_time, :overtime, :o_nextday, :business_process, :o_request])[:attendances]
     end
 
     # 通知のあった残業時間申請の承認内容を扱います。
     def notice_overtime_params
-      params.require(:user).permit(attendances:[:o_approval, :change])[:attendances]
+      params.require(:user).permit(attendances: [:o_approval, :change])[:attendances]
     end
 
     # 残業時間の計算

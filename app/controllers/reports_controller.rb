@@ -1,6 +1,6 @@
 class ReportsController < ApplicationController
   before_action :set_user, only: [:notice_report, :update_report]
-  before_action :set_month, only: :notice_report
+  before_action :set_one_month, only: :notice_report
 
   NOTICE_ERROR_MSG = "入力が足りません。申請をやり直してください。"
 
@@ -16,7 +16,7 @@ class ReportsController < ApplicationController
       end
     else
       report = @user.reports.create(report_params)
-      report.r_month = first_day.month.render_to_i
+      report.r_month = first_day.month.to_i
       if report.save
         flash[:success] = "\"#{report.r_request}\"へ#{first_day.month}月の月次申請先を送信しました。"
       else
@@ -28,7 +28,7 @@ class ReportsController < ApplicationController
 
   def notice_report
     @notice_user = User.where(id: Report.where(r_request: @user.name, r_approval: "申請中").select(:user_id))
-    @report_lists = report.where(r_request: @user.name, r_approval: "申請中")
+    @report_lists = Report.where(r_request: @user.name, r_approval: "申請中")
   end
 
   def update_report
@@ -51,7 +51,7 @@ class ReportsController < ApplicationController
       flash[:warning] = "変更にチェックがなかったため、中止しました。"
     end
     redirect_to user_url(@user)
-  rescue ActionRecord::RecordInvalid #トランザクションによるエラーの分岐
+  rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐
     flash[:danger] = NOTICE_ERROR_MSG
     redirect_to user_url(@user)
   end

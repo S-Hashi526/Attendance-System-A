@@ -4,14 +4,14 @@
     <!-- ×マーク -->
     <div class="modal-header" style="border:none">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">$times;</span>
+        <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body">
       <div class="row">
         <div class="col-md-12 position">
 
-          <%= form_with(modal: @user, url: attendances_update_notice_overtime_user_path, local: true, method: :patch) do |f| %>
+          <%= form_with(model: @user, url: attendances_update_notice_overtime_user_path, local: true, method: :patch) do |f| %>
             <% @notice_user.each do |notice_user| %>
               <h4 class="modal-title" style="text-align:center"><%= "【#{notice_user.name}からの残業申請】" %></h4>
               <table class="table table-bordered table-striped table-position table-hover">
@@ -21,7 +21,7 @@
                     <th><%= I18n.t('day_name') %></th>
                     <th><%= Attendance.human_attribute_name :end_time %></th>
                     <th><%= User.human_attribute_name :designated_work_end_time %></th>
-                    <th><%= "時間外残業"%></th>
+                    <th><%= "時間外残業" %></th>
                     <th><%= Attendance.human_attribute_name :business_process %></th>
                     <th><%= Attendance.human_attribute_name :o_approval %></th>
                     <th><%= Attendance.human_attribute_name :change %></th>
@@ -30,7 +30,7 @@
                 </thead>
 
                 <% @attendance_lists.where(user_id: notice_user.id).each do |ats| %>
-                  <%= f.fields_for "attendance[]", ats do |at| %>
+                  <%= f.fields_for "attendances[]", ats do |at| %>
                   <tbody>
                     <tr>
                       <!-- 日付 -->
@@ -47,10 +47,10 @@
                       <td class="center"><%= ats.business_process %></td>
                       <!-- 指示者確認㊞ -->
                       <td class="dropdown_menu">
-                        <%= at.select :o_approval, ['', 'なし', '承認', '否認'], {} %>
+                        <%= at.select :o_approval, ['', 'なし','承認中', '承認', '否認'], {} %>
                       </td>
                       <!-- 変更 -->
-                      <td class="center"><%= at.check_box :chenge, {:checked => false} %></td>
+                      <td class="center"><%= at.check_box :change, {:checked => false} %></td>
                       <!-- 勤怠の確認 -->
                       <td>
                         <%= link_to "確認", user_path(notice_user.id, date: "2022-#{ats.worked_on.month}-01"), :target=>["_new"], class: "btn btn-sm btn-primary" %>

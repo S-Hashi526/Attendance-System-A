@@ -3,6 +3,7 @@ ja:
     models:
       user: ユーザー
       attendance: 勤怠
+      base: 拠点
     attributes:
         user:
           id: ID
@@ -26,3 +27,9 @@ ja:
           finished_at: 退勤時間
           note: 備考
           user: ユーザID
+        base:
+          base_no: 拠点番号
+          base_name: 拠点名
+          attendance_type:  勤怠種類
+        report:
+          r_request: 申請先

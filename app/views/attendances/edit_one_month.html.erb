@@ -1,7 +1,7 @@
 <% provide(:title, @user.name) %>
 <%= form_with(model: @user, url: attendances_update_one_month_user_path(date: @first_day), local: true, method: :patch) do |f| %>
-  <h1>勤怠編集画面</h1>
-  <table class="table table-bordered table-condensed table-hover" id="table-attendances">
+<h1>勤怠編集画面</h1>
+  <table class="table table-bordered table-striped table-condensed table-hover" id="table-attendances">
     <thead>
       <tr>
         <th>日付</th>
@@ -15,32 +15,32 @@
       </tr>
     </thead>
     <tbody>
-      <% @attendances.each do |day| %>
-        <%= f.fields_for "attendances[]", day do |attendance| %>
+      <% @attendances.each do |att| %>
+        <%= f.fields_for "attendances[]", att do |attendance| %>
           
           <tr>
             <!-- 日付 -->
-            <td><%= l(day.worked_on, format: :short) %></td>
+            <td><%= l(att.worked_on, format: :short) %></td>
             <!-- 曜日 -->
             <td class = '<%= "wday#{day.worked_on.wday}"%>'>
               <%= $days_of_the_week[day.worked_on.wday] %>
             </td>
 
             <!-- 出社、退社（現在日以降は申請不可 -->
-            <% if Date.current < day.worked_on %>
-              <td><%= attendance.time_field :started_at, readonly: true, class: "form-control" %></td>
-              <td><%= attendance.time_field :finished_at, readonly: true, class: "form-control" %></td>
+            <% if Date.current < att.worked_on %>
+              <td><%= attendance.time_field :c_af_started_at, readonly: true, class: "form-control" %></td>
+              <td><%= attendance.time_field :c_af_finished_at, readonly: true, class: "form-control" %></td>
             <% else %>
-              <td><%= attendance.time_field :started_at, class: "form-control" %></td>
-              <td><%= attendance.time_field :finished_at, class: "form-control" %></td>
+              <td><%= attendance.time_field :c_af_started_at, class: "form-control" %></td>
+              <td><%= attendance.time_field :c_af_finished_at, class: "form-control" %></td>
             <% end %>
             <!-- 翌日 -->
             <td><%= attendance.check_box :c_af_nextday, {} %></td>
 
             <!-- 在社時間 -->
             <td>
-              <% if day.started_at.present? && day.finished_at.present? %>
-                <%= working_times(day.started_at, day.finished_at) %>
+              <% if att.started_at.present? && att.finished_at.present? %>
+                <%= working_times_check_nextday(att) %>
               <% end %>
             </td>
             <!-- 備考 -->
@@ -56,7 +56,7 @@
                 <% @array = ['', '上長A', '上長B', 'テスト1'] %>
               <% end %>
 
-              <% if day.c_approval == "承認" %>
+              <% if att.c_approval == "承認" %>
                 <%= attendance.select :c_request, @array.map { |item| item }, {selected: ""} %>
               <% else %>
                 <%= attendance.select :c_request, @array.map { |item| item }, {} %>
@@ -69,6 +69,7 @@
   </table>
   
   <div class="center">
+    <%= link_to "↑", attendances_edit_one_month_user_path(date: @first_day), class: "btn btn-default" %>
     <%= link_to "勤怠へ戻る", user_path(date: @first_day), class: "btn btn-md btn-default" %>
     <%= f.submit "編集を保存する", class: "btn btn-md btn-primary" %>
   </div>

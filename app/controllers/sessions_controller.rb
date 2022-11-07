@@ -17,11 +17,9 @@ class SessionsController < ApplicationController
       if current_user.admin?
         redirect_to users_url
       else
+        # 管理者でない場合、ユーザー情報ページにリダイレクト
         redirect_back_or user
       end
-
-      # ユーザー情報ページにリダイレクト
-      # redirect_back_or user
 
     else
       flash.now[:danger] = '認証に失敗しました。'

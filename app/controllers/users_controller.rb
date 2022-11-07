@@ -114,7 +114,7 @@ class UsersController < ApplicationController
       unless params[:attendance][:worked_on] == ""
         @search_date = params[:attendance][:worked_on] + "-1"
         @attendances = @attendances.where(started_at: @search_date.in_time_zone.all_year)
-                                   .where(started_at: @search_date.in_time_zone.all_month)
+                                    .where(started_at: @search_date.in_time_zone.all_month)
         if @attendances.count == 0
           flash.now[:warning] = "承認済みの修正履歴がありません。"
         end
