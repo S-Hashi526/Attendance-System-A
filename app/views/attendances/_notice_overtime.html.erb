@@ -47,7 +47,7 @@
                       <td class="center"><%= ats.business_process %></td>
                       <!-- 指示者確認㊞ -->
                       <td class="dropdown_menu">
-                        <%= at.select :o_approval, ['', 'なし','承認中', '承認', '否認'], {} %>
+                        <%= at.select :o_approval, ['', 'なし','申請中', '承認', '否認'], {} %>
                       </td>
                       <!-- 変更 -->
                       <td class="center"><%= at.check_box :change, {:checked => false} %></td>

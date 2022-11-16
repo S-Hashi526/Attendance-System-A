@@ -36,7 +36,7 @@
 <div>
   <% if @user.superior? && current_user?(@user) %>
     <% if @r_count >= 1 %>
-      <%= link_to "【所属長承認申請のお知らせ】",reports_notice_report_user_path, remote: true, style:"color:#f00" %>
+      <%= link_to "【所属長承認申請のお知らせ】", reports_notice_report_user_path, remote: true, style:"color:#f00" %>
       <span class="box1"><%= "#{@r_count}件の通知があります" %></span><br>
     <% else %>
       <%= "【所属長承認申請のお知らせ】" %><br>
@@ -50,7 +50,7 @@
     <% end %>
 
     <% if @o_count >= 1 %>
-      <%= link_to "【残業申請のお知らせ】", attendances_notice_overtime_user_path, remote:true, style:"color:#f00" %>
+      <%= link_to "【残業申請のお知らせ】", attendances_notice_overtime_user_path, remote: true, style:"color:#f00" %>
       <span class="box1"><%= "#{@o_count}件の通知があります" %></span><br>
     <% else %>
       <%= "【残業申請のお知らせ】" %><br>
@@ -104,17 +104,17 @@
   </thead>
   
   <tbody>
-    <% @attendances.each do |day| %>
+    <% @attendances.each do |oneday| %>
       <tr>
         <!-- 残業申請ボタン -->
         <td>
           <% if current_user?(@user) %>
-            <%= link_to "残業申請", attendances_req_overtime_user_path(params: { att_id: day ,date: @first_day } ), remote: true, class: "btn btn-primary" %>
+            <%= link_to "残業申請", attendances_req_overtime_user_path(params: { att_id: oneday ,date: @first_day } ), remote: true, class: "btn btn-primary" %>
           <% end %>
         </td>
         
         <!-- 日付 -->
-        <td><%= l(day.worked_on, format: :short) %></td>
+        <td><%= l(oneday.worked_on, format: :short) %></td>
         
         <!-- 曜日 -->
         <td class = '<%= "wday#{day.worked_on.wday}"%>'>
@@ -122,49 +122,49 @@
         </td>
 
         <!-- 出社：時、分 -->
-        <td><%= l(day.started_at.floor_to(15.minutes), format: :hour) if day.started_at.present? %></td>
-        <td><%= l(day.started_at.floor_to(15.minutes), format: :minit) if day.started_at.present? %></td>
+        <td><%= l(oneday.started_at.floor_to(15.minutes), format: :hour) if oneday.started_at.present? %></td>
+        <td><%= l(oneday.started_at.floor_to(15.minutes), format: :minit) if oneday.started_at.present? %></td>
         
         <!-- 出社ボタン -->
         <td>
-          <% if (Date.current == day.worked_on) && day.started_at.nil? %>
+          <% if (Date.current == oneday.worked_on) && oneday.started_at.nil? %>
             <%= link_to "出勤", user_attendance_path(@user, day), method: :patch, class: "btn btn-primary btn-attendance" %>
           <% end %>
         </td>
 
         <!-- 退社：時、分 -->
-        <td><%= l(day.finished_at.floor_to(15.minutes), format: :hour) if day.finished_at.present? %></td>
-        <td><%= l(day.finished_at.floor_to(15.minutes), format: :minit) if day.finished_at.present? %></td>
+        <td><%= l(oneday.finished_at.floor_to(15.minutes), format: :hour) if oneday.finished_at.present? %></td>
+        <td><%= l(oneday.finished_at.floor_to(15.minutes), format: :minit) if oneday.finished_at.present? %></td>
         
         <!-- 退社ボタン -->
         <td>
-          <% if (Date.current == day.worked_on) && day.started_at.present? && day.finished_at.nil? %>
+          <% if (Date.current == oneday.worked_on) && oneday.started_at.present? && oneday.finished_at.nil? %>
             <%= link_to "退勤", user_attendance_path(@user, day), method: :patch, class: "btn btn-primary btn-attendance" %>
           <% end %>
         </td>
 
         <!-- 在社時間 -->
         <td>
-          <% if day.started_at.present? && day.finished_at.present? %>
-            <%= str_times = working_times(day.started_at, day.finished_at) %>
+          <% if oneday.started_at.present? && oneday.finished_at.present? %>
+            <%= str_times = working_times(oneday.started_at, oneday.finished_at) %>
             <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
           <% end %>
         </td>
 
         <!-- 備考 -->
-        <td><%= day.note %></td>
+        <td><%= oneday.note %></td>
 
-        <% if day.end_time.present? && !day.o_request.nil? %>
+        <% if oneday.end_time.present? && !oneday.o_request.nil? %>
         <!-- 終了予定時間：時、分 -->
-        <td><%= day.end_time.hour %></td>
-        <td><%= day.end_time.min %></td>
+        <td><%= oneday.end_time.hour %></td>
+        <td><%= oneday.end_time.min %></td>
 
         <!-- 時間外残業 -->
         <td>
-          <% if day.overtime < 0 %>
+          <% if oneday.overtime < 0 %>
             <% "0 h" %>
           <% else %>
-            <%= "#{day.overtime} h" %>
+            <%= "#{oneday.overtime} h" %>
           <% end %>
         </td>
         <% else %>
@@ -174,12 +174,12 @@
         <% end %>
 
         <!-- 業務処理内容 -->
-        <td><%= day.business_process %></td>
+        <td><%= oneday.business_process %></td>
 
         <!-- 指示書確認㊞ -->
         <td>
           <div class="text-left">
-          <% case day.o_approval %>
+          <% case oneday.o_approval %>
             <% when 'なし' then %>
               <%= "" %>
             <% when '申請中' then %>

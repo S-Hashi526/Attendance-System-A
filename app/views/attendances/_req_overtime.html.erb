@@ -35,7 +35,7 @@
                       <%= render 'shared/day_of_week', object: @oneday = @att_id %>
                     </td>
                     <!-- 終了予定時刻 -->
-                    <td class="center"><%= attendance.time_select :finished_at, {:minute_step => 15} %></td>
+                    <td class="center"><%= attendance.time_select :end_time, {:minute_step => 15} %></td>
                     <!-- 翌日 -->
                     <td class="center"><%= attendance.check_box :o_nextday, {:checked => false} %></td>
                     <!-- 業務処理内容 -->

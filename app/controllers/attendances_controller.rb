@@ -149,7 +149,7 @@ class AttendancesController < ApplicationController
         redirect_to user_url(@user)
       end
 
-      #残業申請フォーム
+      # 残業申請フォーム
       def req_overtime
         @att_id = @user.attendances.find(params[:att_id].to_i)
 
@@ -255,7 +255,7 @@ class AttendancesController < ApplicationController
 
     # 残業時間申請内容を扱います。
     def req_overtime_params
-      params.require(:user).permit(attendances:[:end_time, :overtime, :o_nextday, :business_process, :o_request])[:attendances]
+      params.require(:user).permit(attendances: [:end_time, :overtime, :o_nextday, :business_process, :o_request])[:attendances]
     end
 
     # 通知のあった残業時間申請の承認内容を扱います。

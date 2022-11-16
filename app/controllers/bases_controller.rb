@@ -1,8 +1,8 @@
 class BasesController < ApplicationController
-  before_action :set_base, only: [:edit, :update, :destroy]
+  before_action :set_base, only: [:show, :edit, :update, :destroy]
 
   # 管理者かどうか
-  before_action :admin_user, only: [:index, :edit, :update, :destroy]
+  before_action :admin_user, only: [:index, :show, :new, :edit, :update]
 
   def new
   end
@@ -31,7 +31,7 @@ class BasesController < ApplicationController
       flash[:success] = "#{@base.base_name}の拠点情報が更新されました。"
       redirect_to bases_path
     else
-      flash[:success] = "#{@base.base_name}の拠点情報を更新できませんでした。"
+      flash[:success] = "#{@base_name}の拠点情報を更新できませんでした。"
       redirect_to bases_path
     end
   end

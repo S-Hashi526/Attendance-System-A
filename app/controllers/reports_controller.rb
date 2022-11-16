@@ -33,7 +33,7 @@ class ReportsController < ApplicationController
 
   def update_report
     @count = [0,0,0]
-    ActiveRecord::Base.transaction do #トランザクションを開始
+    ActiveRecord::Base.transaction do # トランザクションを開始
       notice_report_params.each do |id,item|
         report = Report.find(id)
         report.attributes = item
@@ -46,7 +46,7 @@ class ReportsController < ApplicationController
       end
     end
     unless @count.sum == 0
-      flash[:success] = "#{@count.sum}件の申請を更新しました。（なし：#{@count[0]}件、承認：#{@count[1]}件、否認：#{@count[2]}件)"
+      flash[:success] = "#{@count.sum}件の申請を更新しました。（なし：#{@count[0]}件、承認：#{@count[1]}件、否認：#{@count[2]}件）"
     else
       flash[:warning] = "変更にチェックがなかったため、中止しました。"
     end

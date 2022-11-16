@@ -14,6 +14,7 @@
         <th>指示者確認㊞</th>
       </tr>
     </thead>
+    
     <tbody>
       <% @attendances.each do |att| %>
         <%= f.fields_for "attendances[]", att do |attendance| %>
@@ -22,8 +23,8 @@
             <!-- 日付 -->
             <td><%= l(att.worked_on, format: :short) %></td>
             <!-- 曜日 -->
-            <td class = '<%= "wday#{day.worked_on.wday}"%>'>
-              <%= $days_of_the_week[day.worked_on.wday] %>
+            <td class = '<%= "wday#{att.worked_on.wday}" %>'>
+              <%= $days_of_the_week[att.worked_on.wday] %>
             </td>
 
             <!-- 出社、退社（現在日以降は申請不可 -->
