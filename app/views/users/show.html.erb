@@ -62,7 +62,7 @@
 <div class="btn-users-show">
   <% if current_user?(@user) %>
     <span class="m5px">
-      <%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class:"btn btn-primary" %>
+      <%= link_to "勤怠を編集", attendances_edit_one_month_user_path(date: @first_day), class: "btn btn-primary" %>
     </span>
     <span><%= link_to "CSV出力", csv_export_user_path(format: :csv, date: @first_day), class: "btn btn-primary" %><br></span>
     <div class="m5px">
@@ -117,8 +117,8 @@
         <td><%= l(oneday.worked_on, format: :short) %></td>
         
         <!-- 曜日 -->
-        <td class = '<%= "wday#{day.worked_on.wday}"%>'>
-          <%= $days_of_the_week[day.worked_on.wday] %>
+        <td class = '<%= "wday#{oneday.worked_on.wday}"%>'>
+          <%= $days_of_the_week[oneday.worked_on.wday] %>
         </td>
 
         <!-- 出社：時、分 -->
@@ -128,7 +128,7 @@
         <!-- 出社ボタン -->
         <td>
           <% if (Date.current == oneday.worked_on) && oneday.started_at.nil? %>
-            <%= link_to "出勤", user_attendance_path(@user, day), method: :patch, class: "btn btn-primary btn-attendance" %>
+            <%= link_to "出勤", user_attendance_path(@user, oneday), method: :patch, class: "btn btn-primary btn-attendance" %>
           <% end %>
         </td>
 
@@ -189,7 +189,7 @@
             <% when '否認' then %>
               <%= "× 残業否認" %><br>
           <% end %>
-          <% case day.c_approval %>
+          <% case oneday.c_approval %>
             <% when 'なし' then %>
               <%= "" %>
             <% when '申請中' then %>

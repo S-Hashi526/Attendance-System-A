@@ -21,7 +21,7 @@ module AttendancesHelper
 
     if attendance.c_bf_nextday
       finish = attendance.finished_at.since(1.days).floor_to(15.minutes)
-      format("%.2f", (((finished - start) / 60) / 60.0))
+      format("%.2f", (((finish - start) / 60) / 60.0))
     else
       finish = attendance.finished_at.floor_to(15.minutes)
       format("%.2f", (((finish - start) / 60) / 60.0))

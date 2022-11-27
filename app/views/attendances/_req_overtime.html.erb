@@ -1,10 +1,10 @@
-<% provide(:title, @user.name) %>
+<% provide(:title, 'req_overtime') %>
 <div class="modal-dialog modal-lg modal-dialog-center">
   <div class="modal-content">
-    <!-- ×マーク -->
-    <div class="modal-header" style="border:none">
+    <!-- ×マーク-->
+    <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
+       <span aria-hidden="true">&times;</span>
       </button>
     </div>
     <div class="modal-body">
@@ -13,15 +13,15 @@
 
           <%= form_with(model: @user, url: attendances_update_overtime_user_path(date: @first_day), local: true, method: :patch) do |f| %>
             <h4 class="modal-title" style="text-align:center">【残業申請】</h4>
-            <table class="table table-bordered table-striped table-position table-hover">
+            <table class="table table-bordered table-striped table-position table-hover">      
               <thead>
                 <tr>
-                  <th><%= Attendance.human_attribute_name :worked_on %></th>
-                  <th><%= I18n.t('day_name') %></th>
-                  <th><%= "終了予定時刻" %></th>
-                  <th><%= "翌日" %></th>
-                  <th><%= "業務処理内容" %></th>
-                  <th><%= "指示者確認㊞" %></th>
+                  <th>日付</th>
+                  <th>曜日</th>          
+                  <th>終了予定時間</th>            
+                  <th>翌日</th>
+                  <th>業務処理内容</th>
+                  <th>指示者確認㊞</th>
                 </tr>
               </thead>
 
@@ -29,36 +29,33 @@
                 <tbody>
                   <tr>
                     <!-- 日付 -->
-                    <td class="center"><%= l(@att_id.worked_on, format: :short) %></td>
+                    <td><%= l(@att_id.worked_on, format: :short) %></td>
                     <!-- 曜日 -->
-                    <td class="center">
-                      <%= render 'shared/day_of_week', object: @oneday = @att_id %>
-                    </td>
+                    <td><%= $days_of_the_week[@att_id.worked_on.wday] %></td>
                     <!-- 終了予定時刻 -->
-                    <td class="center"><%= attendance.time_select :end_time, {:minute_step => 15} %></td>
+                    <td><%= attendance.time_select :end_time, class: "form-control" %></td>
                     <!-- 翌日 -->
-                    <td class="center"><%= attendance.check_box :o_nextday, {:checked => false} %></td>
+                    <td><%= attendance.check_box :o_nextday, id: "o_next_day" %></td>
                     <!-- 業務処理内容 -->
-                    <td class="center"><%= attendance.text_field :business_process %></td>
+                    <td><%= attendance.text_field :business_process, class: "form-control" %></td>            
                     <!-- 指示者確認㊞ -->
                     <td class="dropdown_menu">
                       <% if @user.name == "上長A" %>
-                        <%= attendance.select :o_request, ['', '上長B', 'テスト1'], {:selected =>''} %>
+                        <%= attendance.select :o_repuest, ['', '上長B', 'テスト1'], {:selected =>''} %>
                       <% elsif @user.name == "上長B" %>
-                        <%= attendance.select :o_request, ['', '上長A', 'テスト1'], {:selected =>''} %>
+                        <%= attendance.select :o_repuest, ['', '上長A', 'テスト1'], {:selected =>''} %>
                       <% else %>
-                        <%= attendance.select :o_request, ['', '上長A', '上長B', 'テスト1'], {:selected =>''} %>
+                        <%= attendance.select :o_repuest, ['', '上長A', '上長B', 'テスト1'], {:selected =>''} %>
                       <% end %>
                     </td>
-                  </tr>
-                </tbody>
+                  </tr>                  
+                </tbody> 
               <% end %>
 
             </table>
 
-            <!-- ボタン -->
-            <div class="center">
-              <%= f.submit "申請する", class: "btn btn-md btn-primary" %>
+            <div class="center">        
+              <%= f.submit "変更を送信", class: "btn btn-lg btn-primary" %>
             </div>
           <% end %>
         </div>
