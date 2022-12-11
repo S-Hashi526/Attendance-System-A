@@ -33,7 +33,7 @@
                     <!-- 曜日 -->
                     <td><%= $days_of_the_week[@att_id.worked_on.wday] %></td>
                     <!-- 終了予定時刻 -->
-                    <td><%= attendance.time_select :end_time, class: "form-control" %></td>
+                    <td><%= attendance.time_field :end_time, class: "form-control" %></td>
                     <!-- 翌日 -->
                     <td><%= attendance.check_box :o_nextday, id: "o_next_day" %></td>
                     <!-- 業務処理内容 -->

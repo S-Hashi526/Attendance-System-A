@@ -18,7 +18,7 @@ class SessionsController < ApplicationController
         redirect_to users_url
       else
         # 管理者でない場合、ユーザー情報ページにリダイレクト
-        redirect_to current_user
+        redirect_back_or user
       end
 
     else

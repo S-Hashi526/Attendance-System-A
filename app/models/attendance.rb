@@ -12,7 +12,7 @@ class Attendance < ApplicationRecord
   validate :finished_at_is_invalid_without_a_started_at, on: :overtime_update
 
   # 翌日⁼falseの場合、出社時間より早い終了予定時間は無効
-  validate :started_at_than_end_time_fast_if_invalid, on: :overtime_update
+  validate :started_at_than_finished_at_fast_if_invalid, on: :overtime_update
 
   def finished_at_is_invalid_without_a_started_at
     errors.add(:started_at, "が未入力です。") if started_at.blank? && finished_at.present?
