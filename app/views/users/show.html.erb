@@ -139,7 +139,7 @@
         <!-- 退社ボタン -->
         <td>
           <% if (Date.current == oneday.worked_on) && oneday.started_at.present? && oneday.finished_at.nil? %>
-            <%= link_to "退勤", user_attendance_path(@user, day), method: :patch, class: "btn btn-primary btn-attendance" %>
+            <%= link_to "退勤", user_attendance_path(@user, oneday), method: :patch, class: "btn btn-primary btn-attendance" %>
           <% end %>
         </td>
 

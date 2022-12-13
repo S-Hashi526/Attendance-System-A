@@ -17,8 +17,7 @@
         <th>変更前退社時間</th>
         <th>変更後出社時間</th>
         <th>変更後退社時間</th>
-        <th>指示者</th>
-        <th>承認日</th>
+        <th>承認者</th>
       </tr>
     </thead>
 
@@ -35,10 +34,8 @@
             <!--変更後-->
             <td><%= l(att.c_af_started_at, format: :time) %></td>
             <td><%= l(att.c_af_finished_at, format: :time) %></td>
-            <!--指示者-->
+            <!--承認者-->
             <td><%= att.c_request %></td>
-            <!--承認日-->
-            <td><%= l(att.c_approval_date, format: :long2) %></td>
           <% end %>
         </tr>
       </tbody>
