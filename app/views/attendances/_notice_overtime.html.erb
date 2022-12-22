@@ -1,4 +1,4 @@
-<% provide(:title, @user.name) %>
+<% provide(:title, 'notice_overtime') %>
 <div class="modal-dialog modal-lg modal-dialog-center">
   <div class="modal-content">
     <!-- ×マーク -->
@@ -17,14 +17,14 @@
               <table class="table table-bordered table-striped table-position table-hover">
                 <thead>
                   <tr>
-                    <th><%= Attendance.human_attribute_name :worked_on %></th>
-                    <th><%= I18n.t('day_name') %></th>
-                    <th><%= Attendance.human_attribute_name :end_time %></th>
-                    <th><%= User.human_attribute_name :designated_work_end_time %></th>
-                    <th><%= "時間外残業" %></th>
-                    <th><%= Attendance.human_attribute_name :business_process %></th>
-                    <th><%= Attendance.human_attribute_name :o_approval %></th>
-                    <th><%= Attendance.human_attribute_name :change %></th>
+                    <th>日付</th>
+                    <th>曜日</th>
+                    <th>終了予定時間</th>
+                    <th>指定終了予定時間</th>
+                    <th>時間外残業</th>
+                    <th>業務処理内容</th>
+                    <th>指示者確認㊞</th>
+                    <th>変更</th>
                     <th><%= "勤怠を確認する" %></th>
                   </tr>
                 </thead>
@@ -36,7 +36,8 @@
                       <!-- 日付 -->
                       <td class="center"><%= l(ats.worked_on, format: :short) %></td>
                       <!-- 曜日 -->
-                      <td class="center"><%= render 'shared/day_of_week', object: @oneday = ats %></td>
+                      <td class = '<%= "wday#{ats.worked_on.wday}" %>'>
+                        <%= $days_of_the_week[ats.worked_on.wday] %>
                       <!-- 終了予定時刻 -->
                       <td class="center"><%= l(ats.end_time, format: :time) %></td>
                       <!-- 指定勤務終了時間 -->

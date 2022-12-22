@@ -41,11 +41,11 @@
                     <!-- 指示者確認㊞ -->
                     <td class="dropdown_menu">
                       <% if @user.name == "上長A" %>
-                        <%= attendance.select :o_repuest, ['', '上長B', 'テスト1'], {:selected =>''} %>
+                        <%= attendance.select :o_request, ['', '上長B', 'テスト1'], {:selected =>''} %>
                       <% elsif @user.name == "上長B" %>
-                        <%= attendance.select :o_repuest, ['', '上長A', 'テスト1'], {:selected =>''} %>
+                        <%= attendance.select :o_request, ['', '上長A', 'テスト1'], {:selected =>''} %>
                       <% else %>
-                        <%= attendance.select :o_repuest, ['', '上長A', '上長B', 'テスト1'], {:selected =>''} %>
+                        <%= attendance.select :o_request, ['', '上長A', '上長B', 'テスト1'], {:selected =>''} %>
                       <% end %>
                     </td>
                   </tr>                  
@@ -55,7 +55,7 @@
             </table>
 
             <div class="center">        
-              <%= f.submit "変更を送信", class: "btn btn-lg btn-primary" %>
+              <%= f.submit "残業を申請する", class: "btn btn-lg btn-primary" %>
             </div>
           <% end %>
         </div>

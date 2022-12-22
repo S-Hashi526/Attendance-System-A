@@ -26,13 +26,11 @@ class UsersController < ApplicationController
 
   def csv_export
     respond_to do |format|
-      format.html do
-          #html用の処理を書く
-      end
-      format.csv do
-          #csv用の処理を書く
-        send_data render_to_string,
-        filename: "【勤怠】#{@user.name}_#{@first_day.strftime("%Y-%m")}.csv", type: :csv
+      format.html 
+        # html用の処理を記述
+      format.csv do |csv|
+        # csv用の処理を記述
+        send_attendances_csv(@attendances)
       end
     end
   end
@@ -132,6 +130,40 @@ class UsersController < ApplicationController
     
     def basic_info_params
       params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
+    end
+
+    def send_attendances_csv(attendances)
+      #文字化け防止
+      bom = "\uFEFF"
+      # CSV.generate：対象データを自動的にCSV形式に変換してくれるCSVライブラリの一種
+      csv_data = CSV.generate(bom, encoding: Encoding::SJIS, row_sep: "\r\n", force_quotes: true) do |csv|
+        # %w()は空白で区切って配列を返す。
+        column_names = %W(日付 曜日 出勤時間 退勤時間)
+        # csv << column_namesは表の列に入る名前を定義
+        csv << column_names
+        # column_valuesに代入するカラム値を定義
+        @attendances = @user.attendances.where(worked_on: @first_day..@last_day).order(:worked_on)
+        @attendances.each do |day|
+          column_values = [
+            l(day.worked_on, format: :short),
+            $days_of_the_week[day.worked_on.wday],
+            if day.started_at.present? && (day.c_request == "承認").present?
+              l(day.started_at.floor_to(60*15), format: :time)
+            else
+              ""
+            end,
+            if day.finished_at.present? && (day.c_request == "承認").present?
+              l(day.finished_at.floor_to(60*15), format: :time)
+            else
+              ""
+            end
+          ]
+        # csv << column_valueは表の行に入る値を定義
+          csv << column_values
+        end
+      end
+      # csv出力ファイル名を定義
+      send_data(csv_data, filename: "#{user.name}の勤怠一覧.csv")
     end
 
     def query
