@@ -22,9 +22,8 @@ class UsersController < ApplicationController
     @r_count = Report.where(r_request: @user.name, r_approval: "申請中").count
     @a_count = Attendance.where(c_request: @user.name, c_approval: "申請中").count
     @o_count = Attendance.where(o_request: @user.name, o_approval: "申請中").count
-  end
-
-  def csv_export
+  
+    # csv出力
     respond_to do |format|
       format.html 
         # html用の処理を記述
@@ -163,7 +162,7 @@ class UsersController < ApplicationController
         end
       end
       # csv出力ファイル名を定義
-      send_data(csv_data, filename: "#{user.name}の勤怠一覧.csv")
+      send_data(csv_data, filename: "【勤怠一覧】#{@user.name}_#{@first_day.strftime("%Y-%m")}.csv", type: :csv)
     end
 
     def query
